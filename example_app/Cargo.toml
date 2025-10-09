@@ -1,0 +1,18 @@
+
+[package]
+name = "example_app"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+soa_runtime = { path = "../soa_runtime" }
+soa_macros = { path = "../soa_macros" }
+
+[[example]]
+name = "ecommerce_analytics"
+path = "../examples/ecommerce_analytics.rs"
+
+[[example]]
+name = "performance_benchmark"
+path = "../examples/performance_benchmark.rs"

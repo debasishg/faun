@@ -1,0 +1,14 @@
+
+[workspace]
+members = ["soa_runtime", "soa_macros", "example_app"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["SoA Framework Contributors"]
+license = "MIT"
+repository = "https://github.com/your-org/soa-framework"
+description = "A Rust framework combining Domain-Driven Design with Structure of Arrays performance"
+keywords = ["soa", "ddd", "performance", "data-oriented", "cache-friendly"]
+categories = ["data-structures", "development-tools::procedural-macro-helpers"]
