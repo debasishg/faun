@@ -1,7 +1,6 @@
-
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
-use syn::{parse_macro_input, DeriveInput, Data, Fields};
+use syn::{parse_macro_input, Data, DeriveInput, Fields};
 
 #[proc_macro_derive(SoA, attributes(soa))]
 pub fn derive_soa(input: TokenStream) -> TokenStream {
@@ -13,13 +12,26 @@ pub fn derive_soa(input: TokenStream) -> TokenStream {
     let fields = match input.data {
         Data::Struct(s) => match s.fields {
             Fields::Named(named) => named.named,
-            _ => return syn::Error::new_spanned(s.fields, "SoA derive requires a braced struct with named fields").to_compile_error().into(),
+            _ => {
+                return syn::Error::new_spanned(
+                    s.fields,
+                    "SoA derive requires a braced struct with named fields",
+                )
+                .to_compile_error()
+                .into()
+            }
         },
-        _ => return syn::Error::new_spanned(&ident, "SoA derive works only on structs").to_compile_error().into(),
+        _ => {
+            return syn::Error::new_spanned(&ident, "SoA derive works only on structs")
+                .to_compile_error()
+                .into()
+        }
     };
 
     if fields.is_empty() {
-        return syn::Error::new_spanned(&ident, "SoA derive requires at least one field").to_compile_error().into();
+        return syn::Error::new_spanned(&ident, "SoA derive requires at least one field")
+            .to_compile_error()
+            .into();
     }
 
     let field_idents: Vec<_> = fields.iter().map(|f| f.ident.clone().unwrap()).collect();
@@ -115,10 +127,7 @@ pub fn derive_soa(input: TokenStream) -> TokenStream {
 
 #[proc_macro_derive(SoAStore, attributes(soa_store))]
 pub fn derive_soa_store(input: TokenStream) -> TokenStream {
-    use syn::{
-        Data, DeriveInput, Fields,
-        Ident, LitInt, LitStr,
-    };
+    use syn::{Data, DeriveInput, Fields, Ident, LitInt, LitStr};
 
     let input = parse_macro_input!(input as DeriveInput);
     let ident = input.ident;
@@ -128,9 +137,20 @@ pub fn derive_soa_store(input: TokenStream) -> TokenStream {
     let fields = match input.data {
         Data::Struct(s) => match s.fields {
             Fields::Named(named) => named.named,
-            _ => return syn::Error::new_spanned(s.fields, "SoAStore derive requires a braced struct with named fields").to_compile_error().into(),
+            _ => {
+                return syn::Error::new_spanned(
+                    s.fields,
+                    "SoAStore derive requires a braced struct with named fields",
+                )
+                .to_compile_error()
+                .into()
+            }
         },
-        _ => return syn::Error::new_spanned(&ident, "SoAStore derive works only on structs").to_compile_error().into(),
+        _ => {
+            return syn::Error::new_spanned(&ident, "SoAStore derive works only on structs")
+                .to_compile_error()
+                .into()
+        }
     };
 
     // Defaults
@@ -138,7 +158,11 @@ pub fn derive_soa_store(input: TokenStream) -> TokenStream {
     let mut shards_default: usize = 16;
 
     // Parse: #[soa_store(key = "id", shards = 16)]
-    for attr in input.attrs.iter().filter(|a| a.path().is_ident("soa_store")) {
+    for attr in input
+        .attrs
+        .iter()
+        .filter(|a| a.path().is_ident("soa_store"))
+    {
         let res = attr.parse_nested_meta(|meta| {
             if meta.path.is_ident("key") {
                 let lit: LitStr = meta.value()?.parse()?;
@@ -160,7 +184,12 @@ pub fn derive_soa_store(input: TokenStream) -> TokenStream {
     // Validate shard key exists
     let field_idents: Vec<_> = fields.iter().map(|f| f.ident.clone().unwrap()).collect();
     if !field_idents.iter().any(|f| f == &shard_key) {
-        return syn::Error::new(shard_key.span(), "soa_store key must be a field of the struct").to_compile_error().into();
+        return syn::Error::new(
+            shard_key.span(),
+            "soa_store key must be a field of the struct",
+        )
+        .to_compile_error()
+        .into();
     }
 
     let soa_ident = format_ident!("{}SoA", ident);

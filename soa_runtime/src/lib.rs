@@ -1,4 +1,3 @@
-
 //! Traits and helpers used by the `#[derive(SoA)]` proc-macro.
 
 pub trait SoaModel {

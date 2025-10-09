@@ -12,3 +12,22 @@ repository = "https://github.com/your-org/soa-framework"
 description = "A Rust framework combining Domain-Driven Design with Structure of Arrays performance"
 keywords = ["soa", "ddd", "performance", "data-oriented", "cache-friendly"]
 categories = ["data-structures", "development-tools::procedural-macro-helpers"]
+
+[package]
+name = "faun"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description.workspace = true
+
+[dependencies]
+soa_macros = { path = "soa_macros" }
+soa_runtime = { path = "soa_runtime" }
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "performance_benchmark"
+harness = false
