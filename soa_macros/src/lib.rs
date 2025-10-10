@@ -69,6 +69,15 @@ pub fn derive_soa(input: TokenStream) -> TokenStream {
         quote! { debug_assert_eq!(self.#first_field.len(), self.#id.len(), "SoA columns length mismatch"); }
     });
 
+    let raw_array_methods = field_idents.iter().zip(field_types.iter()).map(|(id, ty)| {
+        let method_name = format_ident!("{}_raw_array", id);
+        quote! {
+            #vis fn #method_name(&self) -> &[#ty] {
+                &self.#id
+            }
+        }
+    });
+
     let expanded = quote! {
         #[derive(Clone)]
         #vis struct #soa_ident {
@@ -100,6 +109,11 @@ pub fn derive_soa(input: TokenStream) -> TokenStream {
             #vis fn iter(&self) -> impl ::std::iter::Iterator<Item = #view_ident<'_>> + '_ {
                 (0..self.len()).map(|i| self.view(i))
             }
+        }
+
+        // Raw array accessor methods for performance optimizations
+        impl #soa_ident {
+            #( #raw_array_methods )*
         }
 
         #vis struct #view_ident<'a> { #( #view_fields, )* }

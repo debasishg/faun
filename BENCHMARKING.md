@@ -7,7 +7,7 @@ This project now includes proper benchmarking capabilities using the `criterion`
 To run the performance benchmarks:
 
 ```bash
-cargo bench
+cargo bench -p example_app
 ```
 
 This will run comprehensive benchmarks comparing:
@@ -16,12 +16,13 @@ This will run comprehensive benchmarks comparing:
 - Aggregation operations (grouping by category)
 - Different dataset sizes (10K, 100K, 1M records)
 
-## Running the Demo
+## Running the Interactive Demo
 
-To see a demonstration of the functionality without timing measurements:
+To see an educational demonstration with explanations (not statistical benchmarks):
 
 ```bash
-cargo bench
+# Interactive demonstration with optimization showcase
+cargo run --package example_app
 ```
 
 ## Benchmark Results

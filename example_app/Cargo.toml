@@ -1,10 +1,31 @@
-
 [package]
 name = "example_app"
-version = "0.1.0"
-edition = "2021"
-publish = false
+version.workspace = true
+edition.workspace = true
+
+[lib]
+name = "example_app"
+path = "src/lib.rs"
+
+[[bin]]
+name = "example_app"
+path = "src/main.rs"
 
 [dependencies]
-soa_runtime = { path = "../soa_runtime" }
 soa_macros = { path = "../soa_macros" }
+soa_runtime = { path = "../soa_runtime" }
+
+[dependencies.rayon]
+version = "1.8"
+optional = true
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[features]
+default = []
+parallel = ["dep:rayon"]
+
+[[bench]]
+name = "advanced_optimizations"
+harness = false
