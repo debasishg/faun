@@ -460,16 +460,19 @@ let results: Vec<f64> = (0..sharded_store.shard_count())
 cargo build
 
 # Run the basic example
-cargo run --bin example_app
+cargo run --package example_app
 
-# Run the comprehensive e-commerce analytics demo
-cargo run --example ecommerce_analytics
+# Run the advanced e-commerce analytics demo (implements the "Real-World Example")
+cargo run --package example_app_advanced
 
-# Run performance benchmarks (use --release for accurate timing)
-cargo run --example performance_benchmark --release
+# Run with parallel processing capabilities
+cargo run --package example_app_advanced --features parallel
+
+# Run performance benchmarks with Criterion
+cargo bench
 
 # View generated code from macros
-cargo expand --bin example_app
+cargo expand --package example_app
 
 # Run tests
 cargo test

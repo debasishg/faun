@@ -21,7 +21,7 @@ This will run comprehensive benchmarks comparing:
 To see a demonstration of the functionality without timing measurements:
 
 ```bash
-cargo run --example performance_benchmark
+cargo bench
 ```
 
 ## Benchmark Results
