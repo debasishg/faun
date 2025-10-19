@@ -2,6 +2,7 @@ use soa_macros::{SoA, SoAStore};
 use std::collections::HashMap;
 
 pub mod optimizations;
+pub mod persistence;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum OrderStatus {
@@ -197,3 +198,6 @@ impl Default for OrderAoS {
         Self::new()
     }
 }
+
+// Re-export the persistence types for convenience
+pub use persistence::PersistentOrderStore;

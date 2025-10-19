@@ -11,9 +11,18 @@ path = "src/lib.rs"
 name = "example_app"
 path = "src/main.rs"
 
+[[bin]]
+name = "persistent_demo"
+path = "src/persistent_demo.rs"
+
 [dependencies]
 soa_macros = { path = "../soa_macros" }
 soa_runtime = { path = "../soa_runtime" }
+soa_persistence = { path = "../soa_persistence" }
+tokio = { version = "1.0", features = ["full"] }
+arrow = "53.0"
+arrow-array = "53.0" 
+arrow-schema = "53.0"
 
 [dependencies.rayon]
 version = "1.8"

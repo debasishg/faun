@@ -2,10 +2,82 @@
 use std::collections::HashMap;
 
 // Import all types from lib.rs - no more duplicates!
-use example_app::{Order, OrderStatus, PaymentMethod};
+use example_app::{Order, OrderStatus, PaymentMethod, PersistentOrderStore};
 
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ddd_repository_demo();
+
+    println!("\n");
+
+    persistent_repository_demo().await?;
+
+    Ok(())
+}
+
+/// Demonstration of persistent SoA repository
+async fn persistent_repository_demo() -> Result<(), Box<dyn std::error::Error>> {
+    println!("🏛️ Persistent DDD Repository with Arrow Backend");
+    println!("{}", "=".repeat(60));
+
+    let mut persistent_repo = PersistentOrderStore::with_capacity(50);
+
+    println!("📦 Adding orders with automatic persistence...");
+
+    // Add orders with persistence
+    persistent_repo
+        .add(
+            Order::new_with_payment(1, 1001, 2001, 2, 99.99, PaymentMethod::CreditCard)
+                .with_status(OrderStatus::Delivered),
+        )
+        .await?;
+
+    persistent_repo
+        .add(
+            Order::new_with_payment(2, 1002, 2002, 1, 149.50, PaymentMethod::PayPal)
+                .with_status(OrderStatus::Shipped),
+        )
+        .await?;
+
+    persistent_repo
+        .add(
+            Order::new_with_payment(3, 1003, 2003, 3, 75.25, PaymentMethod::BankTransfer)
+                .with_status(OrderStatus::Delivered),
+        )
+        .await?;
+
+    println!(
+        "✅ Added {} orders with automatic persistence",
+        persistent_repo.len()
+    );
+
+    // Analytics on persistent data
+    println!("\n💰 Persistent Repository Analytics:");
+    let kernel = persistent_repo.kernel();
+    let delivered_revenue: f64 = kernel
+        .iter()
+        .filter(|order| matches!(*order.status, OrderStatus::Delivered))
+        .map(|order| *order.total_amount)
+        .sum();
+
+    println!("  Total delivered revenue: ${:.2}", delivered_revenue);
+    println!(
+        "  Persisted orders count: {}",
+        persistent_repo.storage_count().await?
+    );
+
+    // Memory stats
+    let stats = persistent_repo.memory_stats().await?;
+    println!("  Memory usage: {} bytes", stats.total_bytes);
+
+    println!("\n✨ Key Benefits:");
+    println!("  • Same DDD API with automatic persistence");
+    println!("  • Zero-copy Arrow columnar storage");
+    println!("  • In-memory for speed + durability option");
+    println!("  • Analytics-ready data format");
+    println!("  • Compatible with data science ecosystem");
+
+    Ok(())
 }
 
 /// Demonstration of DDD Repository pattern using generated OrderStore

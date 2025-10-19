@@ -1,0 +1,21 @@
+[package]
+name = "soa_persistence"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+arrow = "53.0"
+arrow-array = "53.0"
+arrow-schema = "53.0"
+parquet = "53.0"
+tokio = { version = "1.0", features = ["full"] }
+async-trait = "0.1"
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+
+# Local dependencies
+soa_macros = { path = "../soa_macros" }
+soa_runtime = { path = "../soa_runtime" }
+
+[dev-dependencies]
+tokio-test = "0.4"

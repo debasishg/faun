@@ -1,6 +1,6 @@
 
 [workspace]
-members = ["soa_runtime", "soa_macros", "example_app"]
+members = ["soa_runtime", "soa_macros", "example_app", "soa_persistence"]
 resolver = "2"
 
 [workspace.package]
