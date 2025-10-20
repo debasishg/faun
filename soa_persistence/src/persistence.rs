@@ -1,7 +1,22 @@
 use crate::errors::Result;
 use async_trait::async_trait;
 
-/// Core persistence trait for SoA structures
+/// Core persistence trait for SoA structures enabling storage backend abstraction.
+///
+/// This trait provides a unified interface for persisting Structure-of-Arrays (SoA) data
+/// across different storage backends (in-memory Arrow, Parquet files, DuckDB, etc.).
+///
+/// **Why `#[async_trait]`?**
+/// - **I/O Operations**: Most persistence backends involve I/O (file system, network, database)
+/// - **Non-blocking**: Async operations prevent blocking the application during persistence
+/// - **Scalability**: Enables concurrent persistence operations and better resource utilization
+/// - **Future-proofing**: Even in-memory implementations benefit from async for consistency
+///
+/// **Design Principles**:
+/// - **Zero-copy where possible**: Leverage SoA → Arrow conversion without data copying
+/// - **Backend agnostic**: Same interface works with Arrow, Parquet, DuckDB, etc.
+/// - **Error handling**: Comprehensive error types for robust applications
+/// - **Batch-friendly**: Efficient operations on columnar data structures
 #[async_trait]
 pub trait SoAPersistence<T> {
     /// Save data, replacing any existing content
@@ -30,7 +45,23 @@ pub trait SoAPersistence<T> {
     }
 }
 
-/// Batch operations trait for efficient bulk operations
+/// Specialized trait for efficient batch operations on SoA data.
+///
+/// Extends `SoAPersistence` with optimized bulk operations that leverage the columnar
+/// nature of SoA structures. This trait enables high-throughput scenarios where
+/// processing large datasets in batches provides significant performance benefits.
+///
+/// **Key Benefits**:
+/// - **Bulk efficiency**: Single transaction/operation for multiple batches
+/// - **Memory optimization**: Better memory usage patterns for large datasets  
+/// - **Columnar optimization**: Leverages Arrow's batch processing capabilities
+/// - **Reduced overhead**: Minimizes per-operation costs (locks, I/O, transactions)
+///
+/// **Use Cases**:
+/// - Data ingestion pipelines
+/// - ETL operations
+/// - Analytics workloads
+/// - Bulk data migration
 #[async_trait]
 pub trait SoABatchPersistence<T>: SoAPersistence<T> {
     /// Save multiple data batches efficiently

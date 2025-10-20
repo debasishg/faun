@@ -35,6 +35,7 @@ struct Order { id: u64, amount: f64, status: Status }
 - **Thread-Safe Stores**: Built-in Arc-based stores with copy-on-write semantics
 - **Sharded Storage**: Optional sharding for high-performance concurrent access
 - **Cache-Friendly**: Columnar data layout improves CPU cache utilization by 2-10x
+- **Columnar Persistence**: Arrow-based persistence layer for data science and analytics integration
 
 ## 📚 Why Structure of Arrays?
 
@@ -203,6 +204,43 @@ The benchmarks include:
 - **SoA Advantages**: Scenarios where SoA excels (filtering, counting, field access)
 - **Aggregation Comparison**: How different SoA optimization techniques perform
 - **Statistical Analysis**: Confidence intervals, outlier detection, HTML reports
+
+## 📊 Columnar Persistence & Analytics
+
+The SoA Framework includes a comprehensive columnar persistence layer that bridges high-performance computing with data science workflows:
+
+### **📋 Documentation**
+- **[Architecture Overview](columnar_persistence_architecture.md)** - Design principles, trait hierarchy, and scaling architecture
+- **[Implementation Guide](columnar_persistence_implementation.md)** - Step-by-step implementation with code examples and future roadmap
+- **[Quick Start Summary](COLUMNAR_PERSISTENCE_SUMMARY.md)** - Practical usage examples and integration benefits
+
+### **🎯 Key Capabilities**
+- **Zero-Copy Performance**: Direct SoA ↔ Apache Arrow conversion without intermediate allocations
+- **Domain API Preserved**: Add persistence without changing existing business logic code  
+- **Multiple Storage Backends**: In-memory Arrow, Parquet files, DuckDB SQL analytics
+- **Data Science Integration**: Native compatibility with Polars, DataFusion, PyArrow ecosystem
+- **Production Ready**: Comprehensive error handling, memory monitoring, async operations
+
+### **⚡ Quick Example**
+```rust
+// Add columnar persistence to existing domain code
+let mut store = PersistentOrderStore::new();
+
+// Domain API unchanged - persistence is automatic
+store.add(Order::new(1, 101, 1001, 2, 25.99)).await?;
+store.add(Order::new(2, 102, 1002, 1, 49.99)).await?;
+
+// Query persistent storage with business predicates
+let high_value_orders = store.query_storage(|soa| {
+    soa.total_amount_raw_array().iter().any(|&amount| amount > 40.0)
+}).await?;
+
+// Get real-time memory statistics
+let stats = store.memory_stats().await?;
+println!("Storage: {} bytes, {} rows", stats.total_bytes, stats.total_rows);
+```
+
+The persistence layer demonstrates the **perfect marriage of Domain-Driven Design clarity with Data-Oriented Design performance**, enabling seamless integration with modern data science and analytics workflows.
 
 ## 📄 License
 
