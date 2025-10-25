@@ -217,28 +217,59 @@ The SoA Framework includes a comprehensive columnar persistence layer that bridg
 ### **🎯 Key Capabilities**
 - **Zero-Copy Performance**: Direct SoA ↔ Apache Arrow conversion without intermediate allocations
 - **Domain API Preserved**: Add persistence without changing existing business logic code  
-- **Multiple Storage Backends**: In-memory Arrow, Parquet files, DuckDB SQL analytics
-- **Data Science Integration**: Native compatibility with Polars, DataFusion, PyArrow ecosystem
-- **Production Ready**: Comprehensive error handling, memory monitoring, async operations
+- **Multiple Storage Backends**: 
+  - ✅ **In-memory Arrow** - Microsecond operations for real-time processing
+  - ✅ **Parquet files** - Durable disk storage with compression (SNAPPY, GZIP, ZSTD)
+  - 🔄 **DuckDB SQL analytics** - Coming soon
+- **Data Science Integration**: Native compatibility with Polars, DataFusion, PyArrow, Spark ecosystem
+- **Production Ready**: Comprehensive error handling, memory monitoring, async I/O operations
+- **Configurable Compression**: Choose from SNAPPY, GZIP, ZSTD, LZ4, BROTLI for optimal space/speed tradeoff
 
 ### **⚡ Quick Example**
 ```rust
-// Add columnar persistence to existing domain code
-let mut store = PersistentOrderStore::new();
+use soa_persistence::{ArrowPersistence, ParquetPersistence, SoAPersistence};
+use parquet::basic::Compression;
+
+// Option 1: In-memory Arrow persistence (microsecond latency)
+let mut arrow_store = PersistentOrderStore::with_persistence(
+    ArrowPersistence::new()
+);
+
+// Option 2: Durable Parquet persistence (survives restarts)
+let mut parquet_store = PersistentOrderStore::with_persistence(
+    ParquetPersistence::<OrderSoA>::new("./data")
+        .with_compression(Compression::ZSTD(Default::default()))
+);
 
 // Domain API unchanged - persistence is automatic
 store.add(Order::new(1, 101, 1001, 2, 25.99)).await?;
 store.add(Order::new(2, 102, 1002, 1, 49.99)).await?;
+
+// Data persists to Parquet file - reloadable after restart
+let loaded_orders = parquet_store.load().await?;
 
 // Query persistent storage with business predicates
 let high_value_orders = store.query_storage(|soa| {
     soa.total_amount_raw_array().iter().any(|&amount| amount > 40.0)
 }).await?;
 
-// Get real-time memory statistics
-let stats = store.memory_stats().await?;
-println!("Storage: {} bytes, {} rows", stats.total_bytes, stats.total_rows);
+// Efficient metadata-based operations
+let count = parquet_store.count().await?; // No data read needed
 ```
+
+### **🎯 Live Demos**
+
+Run interactive demonstrations of both persistence backends:
+
+```bash
+# Arrow in-memory persistence demo
+cargo run --bin persistent_demo
+
+# Parquet disk-based persistence demo (creates actual Parquet files!)
+cargo run --bin parquet_demo
+```
+
+See [PERSISTENCE_DEMOS.md](./example_app/PERSISTENCE_DEMOS.md) for detailed comparison and Python integration examples.
 
 The persistence layer demonstrates the **perfect marriage of Domain-Driven Design clarity with Data-Oriented Design performance**, enabling seamless integration with modern data science and analytics workflows.
 

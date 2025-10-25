@@ -55,11 +55,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Query for delivered orders
     let delivered_query = persistent_store
-        .query_storage(|soa| {
-            soa.status_raw_array()
-                .iter()
-                .any(|&status| status == OrderStatus::Delivered)
-        })
+        .query_storage(|soa| soa.status_raw_array().contains(&OrderStatus::Delivered))
         .await?;
 
     if let Some(delivered_orders) = delivered_query {
@@ -94,7 +90,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  Created new store instance (simulating restart)");
 
     // The new store starts empty
-    assert!(new_session_store.is_memory_empty());
+    assert!(new_session_store.is_empty());
     println!("  New store is empty: {}", new_session_store.len());
 
     // In a real scenario, you would load from shared persistent storage
@@ -152,8 +148,7 @@ async fn demonstrate_queries(
     let credit_card_query = store
         .query_storage(|soa| {
             soa.payment_method_raw_array()
-                .iter()
-                .any(|&method| method == PaymentMethod::CreditCard)
+                .contains(&PaymentMethod::CreditCard)
         })
         .await?;
 

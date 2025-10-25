@@ -9,13 +9,16 @@ This document describes the architectural design of the trait-based columnar per
 ### ✅ Completed Features
 
 1. **Arrow-based In-Memory Persistence** - Full implementation with `ArrowPersistence<T>`
-2. **Trait-based Architecture** - Extensible design for multiple storage backends
-3. **Zero-Copy Conversion** - Direct SoA ↔ Arrow RecordBatch conversion
-4. **Domain API Preservation** - Existing `OrderStore` API unchanged
-5. **Comprehensive Error Handling** - Rich error types with recovery strategies
-6. **Memory Statistics** - Real-time storage monitoring and optimization
-7. **Async Operations** - Non-blocking persistence with proper error handling
-8. **Type Safety** - Compile-time schema validation
+2. **Parquet-based Disk Persistence** - Full implementation with `ParquetPersistence<T>` ✨ NEW
+3. **Trait-based Architecture** - Extensible design for multiple storage backends
+4. **Zero-Copy Conversion** - Direct SoA ↔ Arrow RecordBatch conversion
+5. **Domain API Preservation** - Existing `OrderStore` API unchanged
+6. **Comprehensive Error Handling** - Rich error types with recovery strategies including async task handling
+7. **Memory Statistics** - Real-time storage monitoring and optimization
+8. **Async Operations** - Non-blocking persistence with proper error handling
+9. **Type Safety** - Compile-time schema validation
+10. **Compression Support** - SNAPPY, GZIP, ZSTD, LZ4, BROTLI compression algorithms
+11. **Durable Storage** - Data persists across application restarts
 
 ### 🔄 Architecture Overview
 
@@ -36,6 +39,7 @@ This document describes the architectural design of the trait-based columnar per
 ┌─────────────────────────────────────────────────────────┐
 │               Persistence Layer (Implemented)           │
 │  • ArrowPersistence<OrderSoA> ✅                        │
+│  • ParquetPersistence<OrderSoA> ✅ NEW                  │
 │  • PersistentOrderStore wrapper ✅                      │
 │  • Async batch operations ✅                            │
 └─────────────────────────────────────────────────────────┘
@@ -44,7 +48,7 @@ This document describes the architectural design of the trait-based columnar per
 ┌─────────────────────────────────────────────────────────┐
 │                Storage Backend                          │
 │  • Memory (Arrow RecordBatch) ✅                        │
-│  • Parquet files (future extension)                     │
+│  • Parquet files ✅ NEW                                 │
 │  • DuckDB integration (future extension)                │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -108,17 +112,18 @@ The architecture uses a layered trait hierarchy that enables seamless scaling fr
                               Backend Implementation Layer
 ┌─────────────────┬─────────────────┬─────────────────┬─────────────────────────┐
 │   IN-MEMORY     │   DISK-BASED    │   ANALYTICAL    │   FUTURE EXTENSIONS     │
-│   (Phase 1) ✅  │   (Phase 2)     │   (Phase 3)     │   (Extensible)          │
+│   (Phase 1) ✅  │   (Phase 2) ✅  │   (Phase 3)     │   (Extensible)          │
 ├─────────────────┼─────────────────┼─────────────────┼─────────────────────────┤
 │ ArrowPersistence│ ParquetPersist  │ DuckDBPersist   │ ClickHousePersistence   │
 │ <OrderSoA>      │ ence<OrderSoA>  │ ence<OrderSoA>  │ BigQueryPersistence     │
-│                 │                 │                 │ SnowflakePersistence    │
-│ • RwLock<Vec<   │ • File I/O      │ • SQL Interface │ • Distributed Storage   │
-│   RecordBatch>> │ • Compression   │ • ACID Trans    │ • Cloud Analytics       │
+│                 │      ✅ NEW     │                 │ SnowflakePersistence    │
+│ • RwLock<Vec<   │ • File I/O ✅   │ • SQL Interface │ • Distributed Storage   │
+│   RecordBatch>> │ • Compression ✅│ • ACID Trans    │ • Cloud Analytics       │
 │ • Zero-copy     │ • Partitioning  │ • Embedded DB   │ • Custom Backends       │
-│ • Thread-safe   │ • Standard      │ • Arrow Native  │                         │
+│ • Thread-safe   │ • Standard ✅   │ • Arrow Native  │                         │
 │ • Memory stats  │   Format        │ • Analytical    │                         │
-│                 │ • Durable       │   Functions     │                         │
+│                 │ • Durable ✅    │   Functions     │                         │
+│                 │ • Async I/O ✅  │                 │                         │
 └─────────────────┴─────────────────┴─────────────────┴─────────────────────────┘
                                        │
                                        ▼
@@ -150,7 +155,7 @@ The architecture uses a layered trait hierarchy that enables seamless scaling fr
 
 **🎯 Implementation Strategy**:
 - **Phase 1 (✅ Complete)**: In-memory Arrow persistence with zero-copy operations
-- **Phase 2 (Planned)**: Parquet file persistence with compression and partitioning
+- **Phase 2 (✅ Complete)**: Parquet file persistence with compression and async I/O
 - **Phase 3 (Planned)**: DuckDB integration with SQL analytical capabilities
 - **Phase N (Extensible)**: Cloud and distributed storage backends
 
@@ -158,8 +163,8 @@ The architecture uses a layered trait hierarchy that enables seamless scaling fr
 ```rust
 // Same API across all backends - just swap the persistence implementation
 let mut store = PersistentOrderStore::with_persistence(
-    ArrowPersistence::new()        // ← In-memory (Phase 1)
-    // ParquetPersistence::new()   // ← Disk-based (Phase 2) 
+    ArrowPersistence::new()        // ← In-memory (Phase 1) ✅
+    // ParquetPersistence::new()   // ← Disk-based (Phase 2) ✅
     // DuckDBPersistence::new()    // ← SQL analytics (Phase 3)
 );
 

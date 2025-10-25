@@ -126,7 +126,7 @@ impl ToArrow for OrderSoA {
             Arc::new(UInt64Array::from(self.shipping_address_hash.clone())),
         ];
 
-        RecordBatch::try_new(schema, columns).map_err(|e| PersistenceError::ArrowError(e))
+        RecordBatch::try_new(schema, columns).map_err(PersistenceError::ArrowError)
     }
 
     fn from_record_batch(batch: &RecordBatch) -> soa_persistence::Result<Self> {
@@ -180,6 +180,12 @@ impl ToArrow for OrderSoA {
 pub struct PersistentOrderStore {
     store: crate::OrderStore,
     persistence: ArrowPersistence<OrderSoA>,
+}
+
+impl Default for PersistentOrderStore {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl PersistentOrderStore {
@@ -275,7 +281,7 @@ impl PersistentOrderStore {
     }
 
     /// Check if both store and persistence are empty
-    pub async fn is_empty(&self) -> soa_persistence::Result<bool> {
+    pub async fn is_storage_empty(&self) -> soa_persistence::Result<bool> {
         let store_empty = self.store.kernel().is_empty();
         let storage_empty = self.persistence.is_empty().await?;
         Ok(store_empty && storage_empty)
@@ -299,6 +305,12 @@ impl PersistentOrderStore {
     }
 
     /// Check if the in-memory store is empty
+    pub fn is_empty(&self) -> bool {
+        self.store.kernel().is_empty()
+    }
+
+    /// Check if the in-memory store is empty (deprecated: use is_empty)
+    #[deprecated(since = "0.1.0", note = "use is_empty instead")]
     pub fn is_memory_empty(&self) -> bool {
         self.store.kernel().is_empty()
     }

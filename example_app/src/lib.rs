@@ -180,6 +180,10 @@ impl OrderAoS {
         self.orders.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.orders.is_empty()
+    }
+
     pub fn revenue_by_payment_method(&self) -> HashMap<PaymentMethod, f64> {
         let mut results = HashMap::new();
 

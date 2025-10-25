@@ -149,7 +149,7 @@ fn ddd_repository_demo() {
     // Process each shard independently (great for parallel processing)
     for shard_id in 0..sharded_repo.shard_count() {
         let shard = sharded_repo.shard(shard_id);
-        if shard.len() > 0 {
+        if !shard.is_empty() {
             println!("  Shard {}: {} orders", shard_id, shard.len());
         }
     }

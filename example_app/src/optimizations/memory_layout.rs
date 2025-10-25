@@ -196,6 +196,10 @@ impl HotColdOrderLayout {
         self.hot_fields.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.hot_fields.is_empty()
+    }
+
     pub fn push(&mut self, order: Order) {
         self.hot_fields.push(HotOrderData {
             status: order.status,

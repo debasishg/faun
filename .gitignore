@@ -7,4 +7,5 @@
 # IDEs
 .vscode/
 .idea/
+parquet_demo_data/
 
